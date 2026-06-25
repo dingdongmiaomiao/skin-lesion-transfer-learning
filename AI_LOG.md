@@ -189,3 +189,133 @@ python scripts/train_baseline.py --model resnet18 --epochs 1 --batch_size 8 --im
 ```
 
 最后根据硬件情况，将正式 baseline 实验扩展到 3～15 个 epoch，用于获得完整的训练曲线和验证 AUC 结果。
+
+---
+
+## 记录 4：Baseline 训练检查与项目文件管理调整
+
+### 当前进度
+
+目前项目已完成以下工作：
+
+1. 完成 `train-metadata.csv` 到 `ground_truth.csv` 的格式转换；
+2. 完成 300 张与 1000 张图片的小样本测试；
+3. 完成完整数据集 1 epoch 的 baseline 训练测试；
+4. 确认训练流程可以正常运行，模型能够完成训练与验证；
+5. 完成 PyTorch AMP 相关 `FutureWarning` 的定位与修改；
+6. 新增数据集完整性检查脚本，用于检查图片是否缺失、损坏或无法读取。
+
+### FutureWarning 调整
+
+在完整数据 baseline 训练过程中，程序出现如下警告：
+
+```text
+FutureWarning: torch.cuda.amp.GradScaler(args...) is deprecated.
+Please use torch.amp.GradScaler('cuda', args...) instead.
+```
+
+该警告不影响训练结果，但说明当前 AMP 混合精度接口写法已经较旧。因此对 `scripts/train_baseline.py` 进行了修改：
+
+```python
+from torch.cuda.amp import GradScaler, autocast
+```
+
+修改为：
+
+```python
+from torch.amp import GradScaler, autocast
+```
+
+同时将训练过程中的 `autocast` 和 `GradScaler` 调整为新版接口，避免后续版本兼容问题。
+
+### 图片完整性检查
+
+由于完整数据集包含 33126 张皮肤镜图片，为避免隐藏坏图或文件名不匹配影响后续实验，新增数据完整性检查脚本：
+
+```text
+scripts/check_dataset_integrity.py
+```
+
+该脚本主要检查：
+
+1. `ground_truth.csv` 是否包含 `image_name` 和 `target`；
+2. `target` 是否只有 0 和 1；
+3. 是否存在重复图片名；
+4. CSV 中记录的图片是否都能在图片文件夹中找到；
+5. 每张图片是否能被 PIL 正常打开和读取；
+6. 图片文件夹中是否存在未被 CSV 使用的额外图片。
+
+运行命令：
+
+```bash
+python scripts/check_dataset_integrity.py
+```
+
+完整数据 1 epoch 已经能够顺利跑完，说明训练与验证过程中用到的图片基本都能被正常读取；完整性检查脚本用于进一步确认数据集无隐藏问题。
+
+### 工序 1 当前状态
+
+工序 1：Baseline 训练目前已基本跑通。
+
+已完成：
+
+* 数据读取；
+* 数据集划分；
+* ResNet-18 baseline 模型构建；
+* CUDA 与混合精度训练；
+* 小样本测试；
+* 完整数据 1 epoch 测试；
+* 输出模型权重、训练日志和曲线图；
+* FutureWarning 修复；
+* 图片完整性检查脚本。
+
+当前工序 1 仅剩：
+
+```text
+完整数据 15 epoch baseline 正式实验
+```
+
+建议正式运行命令：
+
+```bash
+python scripts/train_baseline.py --model resnet18 --epochs 15 --batch_size 16 --img_size 224 --num_workers 4
+```
+
+若 Windows 下 `num_workers=4` 不稳定，则改为：
+
+```bash
+python scripts/train_baseline.py --model resnet18 --epochs 15 --batch_size 16 --img_size 224 --num_workers 0
+```
+
+### 文件管理问题记录
+
+目前项目开发过程中存在文件管理风险。两位成员尚未统一使用 GitHub Desktop 或标准 Git 工作流，代码修改、程序运行和结果交流主要通过本地文件与微信完成。
+
+这会带来以下问题：
+
+1. 两人本地项目版本可能不一致；
+2. 不同机器上的最新版文件位置不清楚；
+3. 修改后的代码可能互相覆盖；
+4. 实验结果、日志和图片容易遗漏；
+5. 最终上传仓库时难以体现清晰的 Commit History；
+6. 课程要求中强调需要开源仓库、AI 交流记录和每位成员真实可见的贡献，因此需要尽快统一文件管理方式。
+
+### 后续处理计划
+
+考虑到项目完成时间较紧，暂时不将主要精力放在学习复杂 Git 分支协作上，而是采用简化文件管理策略：
+
+1. 确定一个 GitHub 或 Gitee 主仓库作为唯一正式版本；
+2. 明确一个本地项目文件夹作为“最新版主目录”；
+3. 数据集、虚拟环境和大模型权重不上传仓库；
+4. 只上传代码、README、AI_LOG、配置文件、结果图表和实验表格；
+5. 每次修改文件前，先确认当前最新版；
+6. 每次上传时写清楚 commit message；
+7. 两位成员分别用自己的账号提交自己负责的内容，保证贡献记录清晰可见。
+
+当前优先级：
+
+```text
+先完成工序 1 的 15 epoch baseline 正式实验；
+同时建立一个统一的远程仓库；
+之后每完成一个工序，就同步上传对应代码、结果和 AI_LOG 记录。
+```
