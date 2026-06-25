@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -56,6 +56,13 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
     parser.add_argument("--seed", type=int, default=42)
+    
+    parser.add_argument(
+        "--debug_samples",
+        type=int,
+        default=-1,
+        help="调试用，只使用前 N 个样本。默认 -1 表示使用全部数据。",
+    )
 
     # baseline 默认冻结 backbone，只训练分类头
     parser.add_argument(
@@ -98,7 +105,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device, scaler, use
 
         optimizer.zero_grad(set_to_none=True)
 
-        with autocast(enabled=use_amp):
+        with autocast(device_type=device.type, enabled=use_amp):
             logits = model(images)
             loss = criterion(logits, labels)
 
@@ -183,6 +190,29 @@ def main():
     # 只保留必要列，避免原始 csv 里有很多无关字段
     df = df[["image_name", "target"]].copy()
     df["target"] = df["target"].astype(int)
+
+    # 调试模式：只抽取一小部分样本，用于快速检查代码、路径、CUDA 是否正常
+    if args.debug_samples > 0:
+        pos_df = df[df["target"] == 1]
+        neg_df = df[df["target"] == 0]
+
+        # 尽量保证调试集里有正负样本，避免 AUC 或分层划分报错
+        pos_n = min(len(pos_df), max(2, args.debug_samples // 10))
+        neg_n = min(len(neg_df), args.debug_samples - pos_n)
+
+        df = pd.concat(
+            [
+                pos_df.sample(n=pos_n, random_state=args.seed),
+                neg_df.sample(n=neg_n, random_state=args.seed),
+            ],
+            axis=0,
+        ).sample(frac=1, random_state=args.seed).reset_index(drop=True)
+
+        print("=" * 60)
+        print(f"调试模式开启：仅使用 {len(df)} 个样本")
+        print("调试样本标签分布:")
+        print(df["target"].value_counts())
+        print("=" * 60)
 
     print("数据集总样本数:", len(df))
     print("标签分布:")
@@ -271,7 +301,7 @@ def main():
         patience=2,
     )
 
-    scaler = GradScaler(enabled=use_amp)
+    scaler = GradScaler(device.type, enabled=use_amp)
 
     history = {
         "epoch": [],
