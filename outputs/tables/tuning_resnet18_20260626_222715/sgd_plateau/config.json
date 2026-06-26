@@ -1,0 +1,26 @@
+{
+    "experiment_config": {
+        "experiment_type": "optimizer",
+        "name": "sgd_plateau",
+        "display_name": "SGD+momentum",
+        "optimizer": "sgd",
+        "scheduler": "plateau"
+    },
+    "args": {
+        "csv_path": "D:\\NNDL\\skin-lesion-transfer-learning\\data/ISIC_2020/ground_truth.csv",
+        "image_dir": "D:\\NNDL\\skin-lesion-transfer-learning\\data/ISIC_2020/train",
+        "experiment_set": "all",
+        "model": "resnet18",
+        "img_size": 224,
+        "epochs": 1,
+        "batch_size": 8,
+        "num_workers": 0,
+        "lr": 0.001,
+        "weight_decay": 0.0001,
+        "seed": 42,
+        "freeze": true,
+        "sample_frac": 0.05,
+        "output_dir": "D:\\NNDL\\skin-lesion-transfer-learning\\outputs",
+        "amp": 1
+    }
+}
