@@ -376,3 +376,37 @@ outputs/checkpoints/baseline_resnet18_20260626_213923/best_model.pth
 优化器对比结果显示，Adam 和 AdamW 均取得了约 0.838 的最佳验证 AUC，其中 AdamW 的 Best AUC 为 0.837864，Adam 的 Best AUC 为 0.837860，二者表现几乎一致；SGD+momentum 的 Best AUC 为 0.822258，明显低于 Adam 系列优化器，说明在本任务和当前训练设置下，自适应优化器具有更好的收敛效果。
 
 学习率调度器对比结果显示，Fixed LR、ReduceLROnPlateau 和 CosineAnnealingLR 的 Best AUC 分别为 0.837980、0.837860 和 0.835348。其中 Fixed LR 数值最高，但与 ReduceLROnPlateau 的差距极小。考虑到后续微调实验会解冻更多网络层，训练过程可能更加不稳定，因此后续实验选择 AdamW + ReduceLROnPlateau 作为默认训练策略。
+
+## 记录 7：工序2 调优实验结果
+
+### 实验设置
+
+本阶段在 baseline 基础上进行调优实验对照。实验固定模型为 ResNet-18，加载 ImageNet 预训练权重，冻结 backbone，仅训练最后的分类头。评价指标为 Validation AUC。
+
+本阶段共运行 5 组实验：
+
+1. Adam + ReduceLROnPlateau；
+2. AdamW + ReduceLROnPlateau；
+3. SGD + momentum + ReduceLROnPlateau；
+4. Adam + Fixed LR；
+5. Adam + CosineAnnealingLR。
+
+### 实验结果
+
+各组实验的最佳验证集 AUC 如下：
+
+| 实验组 | Optimizer | Scheduler | Best AUC | Best Epoch |
+|---|---|---|---:|---:|
+| adam_plateau | Adam | ReduceLROnPlateau | 0.837860 | 15 |
+| adamw_plateau | AdamW | ReduceLROnPlateau | 0.837864 | 15 |
+| sgd_plateau | SGD + momentum | ReduceLROnPlateau | 0.822258 | 15 |
+| adam_fixed | Adam | Fixed LR | 0.837980 | 13 |
+| adam_cosine | Adam | CosineAnnealingLR | 0.835348 | 13 |
+
+### 结果分析
+
+优化器对比结果显示，Adam 和 AdamW 的表现非常接近，二者 Best AUC 均约为 0.838；SGD+momentum 的表现明显低于 Adam 系列优化器。
+
+学习率调度器对比结果显示，Fixed LR 与 ReduceLROnPlateau 的表现非常接近，其中 Fixed LR 的 Best AUC 略高，但差距很小；CosineAnnealingLR 的表现略低。
+
+综合考虑后续微调实验中训练参数量增加、训练过程更容易波动，本项目后续采用 AdamW + ReduceLROnPlateau 作为默认训练策略。
