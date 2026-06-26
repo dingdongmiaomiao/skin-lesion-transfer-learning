@@ -368,3 +368,11 @@ outputs/checkpoints/baseline_resnet18_20260626_213923/best_model.pth
 - 学习率调度器 AUC 对比图。
 
 本阶段结果将用于判断后续微调策略实验应采用哪种优化器和学习率调度方式。
+
+### 调优实验结果分析
+
+在 baseline 模型基础上，本项目进一步比较了不同优化器和学习率调度策略对模型性能的影响。为保证实验公平，本阶段固定模型结构为 ResNet-18，加载 ImageNet 预训练权重，并冻结 backbone，仅训练最后的二分类头。评价指标采用验证集 AUC。
+
+优化器对比结果显示，Adam 和 AdamW 均取得了约 0.838 的最佳验证 AUC，其中 AdamW 的 Best AUC 为 0.837864，Adam 的 Best AUC 为 0.837860，二者表现几乎一致；SGD+momentum 的 Best AUC 为 0.822258，明显低于 Adam 系列优化器，说明在本任务和当前训练设置下，自适应优化器具有更好的收敛效果。
+
+学习率调度器对比结果显示，Fixed LR、ReduceLROnPlateau 和 CosineAnnealingLR 的 Best AUC 分别为 0.837980、0.837860 和 0.835348。其中 Fixed LR 数值最高，但与 ReduceLROnPlateau 的差距极小。考虑到后续微调实验会解冻更多网络层，训练过程可能更加不稳定，因此后续实验选择 AdamW + ReduceLROnPlateau 作为默认训练策略。
