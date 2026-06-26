@@ -323,3 +323,48 @@ python scripts/train_baseline.py --model resnet18 --epochs 15 --batch_size 16 --
 
 ```text
 outputs/checkpoints/baseline_resnet18_20260626_213923/best_model.pth
+```
+
+## 记录 6：工序2 调优实验设计
+
+### 本阶段目标
+
+本阶段在 baseline 模型基础上进行调优实验对照，比较不同优化器和不同学习率调度策略对验证集 AUC 的影响。
+
+### 固定条件
+
+为了保证实验公平，本阶段固定以下条件：
+
+- 数据集划分方式不变；
+- 模型使用 ResNet-18；
+- 使用 ImageNet 预训练权重；
+- 冻结 backbone，仅训练分类头；
+- 图像尺寸为 224；
+- 评价指标为 Validation AUC；
+- 损失函数使用带 `pos_weight` 的 `BCEWithLogitsLoss`。
+
+### 对比内容
+
+优化器对比包括：
+
+1. Adam；
+2. AdamW；
+3. SGD + momentum。
+
+学习率调度器对比包括：
+
+1. Fixed Learning Rate；
+2. CosineAnnealingLR；
+3. ReduceLROnPlateau。
+
+### 输出结果
+
+本阶段脚本会自动保存：
+
+- 每组实验的 `metrics.csv`；
+- 每组实验的 `config.json`；
+- 汇总表格 `tuning_summary.csv`；
+- 优化器 AUC 对比图；
+- 学习率调度器 AUC 对比图。
+
+本阶段结果将用于判断后续微调策略实验应采用哪种优化器和学习率调度方式。
