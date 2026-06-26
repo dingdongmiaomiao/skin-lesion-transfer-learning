@@ -294,3 +294,32 @@ python scripts/train_baseline.py --model resnet18 --epochs 15 --batch_size 16 --
 同时建立一个统一的远程仓库（github desktop）；
 之后每完成一个工序，就同步上传对应代码、结果和 AI_LOG 记录。
 ```
+
+## 记录 5：Baseline 实验结果
+
+### 实验设置
+
+本次实验使用 ResNet-18 作为 baseline 模型，加载 ImageNet 预训练权重，并冻结 backbone，仅训练最后的二分类分类头。
+
+主要参数如下：
+
+- model: resnet18
+- epochs: 15
+- batch_size: 16
+- img_size: 224
+- optimizer: Adam
+- lr: 1e-3
+- scheduler: ReduceLROnPlateau
+- loss: BCEWithLogitsLoss with pos_weight
+- metric: Validation AUC
+
+### 实验结果
+
+训练 15 个 epoch 后，模型取得的最佳验证集 AUC 为：
+
+- Best Valid AUC: 0.83784
+
+最佳模型保存路径为：
+
+```text
+outputs/checkpoints/baseline_resnet18_20260626_213923/best_model.pth
