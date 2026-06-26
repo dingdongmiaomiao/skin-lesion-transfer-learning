@@ -1,0 +1,2 @@
+﻿epoch,train_loss,valid_loss,valid_auc,backbone_lr,head_lr
+1,1.7260278008675647,1.421846023166036,0.6201431492842535,1e-05,0.0001

@@ -1,0 +1,39 @@
+{
+    "experiment_config": {
+        "name": "unfreeze_last10",
+        "display_name": "Unfreeze Last 10 Layers",
+        "strategy": "unfreeze_last10"
+    },
+    "args": {
+        "csv_path": "D:\\NNDL\\skin-lesion-transfer-learning\\data/ISIC_2020/ground_truth.csv",
+        "image_dir": "D:\\NNDL\\skin-lesion-transfer-learning\\data/ISIC_2020/train",
+        "model": "resnet18",
+        "img_size": 224,
+        "epochs": 15,
+        "batch_size": 16,
+        "num_workers": 4,
+        "seed": 42,
+        "backbone_lr": 1e-05,
+        "head_lr": 0.0001,
+        "weight_decay": 0.0001,
+        "unfreeze_last_n": 10,
+        "experiment_set": "all",
+        "sample_frac": 1.0,
+        "output_dir": "D:\\NNDL\\skin-lesion-transfer-learning\\outputs",
+        "amp": 1
+    },
+    "trainable_params": [
+        "fc.weight",
+        "fc.bias",
+        "layer4.0.bn2.bias",
+        "layer4.0.downsample.0.weight",
+        "layer4.0.downsample.1.weight",
+        "layer4.0.downsample.1.bias",
+        "layer4.1.conv1.weight",
+        "layer4.1.bn1.weight",
+        "layer4.1.bn1.bias",
+        "layer4.1.conv2.weight",
+        "layer4.1.bn2.weight",
+        "layer4.1.bn2.bias"
+    ]
+}
