@@ -1,0 +1,31 @@
+{
+    "threshold_0.5": {
+        "threshold": 0.5,
+        "auc": 0.8855811742583904,
+        "accuracy": 0.8124056746151525,
+        "precision": 0.06891271056661562,
+        "recall_sensitivity": 0.7692307692307693,
+        "specificity": 0.8131817483484406,
+        "f1": 0.12649332396345747,
+        "tn": 5293,
+        "fp": 1216,
+        "fn": 27,
+        "tp": 90
+    },
+    "youden_threshold": {
+        "threshold": 0.3832111358642578,
+        "auc": 0.8855811742583904,
+        "accuracy": 0.7589797766374887,
+        "precision": 0.060570071258907364,
+        "recall_sensitivity": 0.8717948717948718,
+        "specificity": 0.7569519127362114,
+        "f1": 0.11327040533037201,
+        "tn": 4927,
+        "fp": 1582,
+        "fn": 15,
+        "tp": 102
+    },
+    "youden_threshold_value": 0.3832111358642578,
+    "checkpoint_path": "D:\\NNDL\\skin-lesion-transfer-learning\\outputs/checkpoints/finetune_resnet18_20260627_002934/full_finetune/best_model.pth",
+    "validation_size": 6626
+}
